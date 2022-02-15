@@ -7,16 +7,16 @@ import plotly.express as px
 
 
 def tickers():
-    t = yf.tickers_sp500(include_company_data=False)
+    #t = yf.tickers_sp500(include_company_data=False)
 
-    # t = []
-    # nt = int(input('Inserire numero di azioni da confrontare:'))
-    # for i in range(nt):
-    # ticker = str(input('''Inserisci ticker dell'impresa numero ''' + str(i) + ':'))
-    # t.append(ticker)
+    t = []
+    nt = int(input('Insert stock number:'))
+    for i in range(nt):
+        ticker = str(input('Insert ticker of the stock number ' + str(i) + ':'))
+        t.append(ticker)
     return t
 
-def Calcolo_Momentum_ID(t):
+def Calculation_Momentum_ID(t):
     Start = datetime.now() - timedelta(days=360)
     End = datetime.now() - timedelta(days=30)
     Interval = '1d'
@@ -26,33 +26,33 @@ def Calcolo_Momentum_ID(t):
 
     for x in t:
         try:
-            Rendimenti = []
-            Azione_SS = yf.get_data(x, start_date=Start, end_date=End, interval=Interval)
-            Azione_SS = Azione_SS['close']
-            primo_prezzo = Azione_SS[1]
-            ultimo_prezzo = Azione_SS[-1]
+            Yield = []
+            Stock_TS = yf.get_data(x, start_date=Start, end_date=End, interval=Interval)
+            Stock_TS = Stock_TS['close']
+            first_price = Stock_TS[1]
+            last_price = Stock_TS[-1]
 
-            Momentum_Azione = ultimo_prezzo / primo_prezzo - 1
+            Momentum_Stock = last_price / first_price - 1
 
-            for i in range(1, len(Azione_SS)):
-                if Azione_SS[i] / Azione_SS[i - 1] - 1 < 0:
-                    Rendimenti.append(0)
+            for i in range(1, len(Stock_TS)):
+                if Stock_TS[i] / Stock_TS[i - 1] - 1 < 0:
+                    Yield.append(0)
                 else:
-                    Rendimenti.append(1)
+                    Yield.append(1)
 
-            giorni_totali = len(Rendimenti)
-            giorni_positivi = sum(Rendimenti)
-            perc_positivi = giorni_positivi / giorni_totali * 100
-            perc_negativi = 100 - perc_positivi
+            total_days = len(Yield)
+            positive_days = sum(Yield)
+            perc_positive = positive_days / total_days * 100
+            perc_negative = 100 - perc_positive
 
-            if Momentum_Azione > 0:
+            if Momentum_Stock > 0:
                 return_sign = 1
             else:
                 return_sign = -1
 
-            ID = return_sign * (perc_negativi - perc_positivi)
+            ID = return_sign * (perc_negative - perc_positive)
 
-            Momentum.append(Momentum_Azione)
+            Momentum.append(Momentum_Stock)
             Information_Discreteness.append(ID)
             Ticker.append(x)
 
@@ -64,28 +64,28 @@ def Calcolo_Momentum_ID(t):
 
     return Momentum_ID
 
-def Grafico(Momentum_ID):
+def Graphic(Momentum_ID):
     fig = px.scatter(Momentum_ID, x="Momentum", y="Information_Discreteness",
                      color='Ticker')
     return fig.show()
 
-def Programma():
+def Program():
     while True:
         t = tickers()
-        Momentum_ID = Calcolo_Momentum_ID(t)
-        excel = pd.ExcelWriter('Momentum_ID_Azioni.xlsx', engine='xlsxwriter')
-        Momentum_ID.to_excel(excel, sheet_name='Azione')
+        Momentum_ID = Calculation_Momentum_ID(t)
+        excel = pd.ExcelWriter('Momentum_ID_Stocks.xlsx', engine='xlsxwriter')
+        Momentum_ID.to_excel(excel, sheet_name='Stocks')
         excel.save()
-        Grafico(Momentum_ID)
+        Graphic(Momentum_ID)
         while True:
-            risposta = str(input('Vuoi visualizzare un nuovo grafico? (si/no): '))
-            if risposta in ('si', 'no'):
+            response = str(input('You want to see a new graphic? (yes/no): '))
+            if response in ('yes', 'no'):
                 break
-            print('Input non valido.')
-        if risposta == 'si':
+            print('Input not valid.')
+        if response == 'yes':
             continue
         else:
-            print('Ciao')
+            print('Bye')
             break
 
-Programma()
+Program()
